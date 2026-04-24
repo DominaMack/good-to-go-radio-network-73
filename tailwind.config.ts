@@ -63,27 +63,40 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        display: ['"Bebas Neue"', '"Oswald"', 'sans-serif'],
+        condensed: ['"Oswald"', 'sans-serif'],
+        body: ['"Inter"', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-gold': 'var(--gradient-gold)',
+        'gradient-gold-bright': 'var(--gradient-gold-bright)',
+        'gradient-dark': 'var(--gradient-dark)',
+        'gradient-hero': 'var(--gradient-hero)',
+        'gradient-radial-gold': 'var(--gradient-radial-gold)',
+      },
+      boxShadow: {
+        'gold': 'var(--shadow-gold)',
+        'gold-strong': 'var(--shadow-gold-strong)',
+        'card-dark': 'var(--shadow-card)',
+        'glow': 'var(--shadow-glow)',
+      },
       keyframes: {
-        "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+        "accordion-down": { from: { height: "0" }, to: { height: "var(--radix-accordion-content-height)" } },
+        "accordion-up": { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
+        "pulse-gold": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(45 90% 55% / 0.7)" },
+          "50%": { boxShadow: "0 0 0 12px hsl(45 90% 55% / 0)" },
         },
-        "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
-        },
+        "wave": { "0%, 100%": { transform: "scaleY(0.4)" }, "50%": { transform: "scaleY(1)" } },
+        "fade-up": { from: { opacity: "0", transform: "translateY(20px)" }, to: { opacity: "1", transform: "translateY(0)" } },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-gold": "pulse-gold 2s ease-out infinite",
+        "wave": "wave 1s ease-in-out infinite",
+        "fade-up": "fade-up 0.6s ease-out forwards",
       },
     },
   },
