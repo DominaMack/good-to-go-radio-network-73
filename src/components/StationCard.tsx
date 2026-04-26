@@ -15,9 +15,16 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
 
   const handlePlay = () => {
     setPlaying(true);
-    toast.success(`Now Playing: ${station.name}`, {
-      description: "Stream connecting... (preview)",
-    });
+    if (station.streamUrl) {
+      window.open(station.streamUrl, "_blank", "noopener,noreferrer");
+      toast.success(`Opening ${station.name}`, {
+        description: "Launching the live stream in a new tab.",
+      });
+    } else {
+      toast.success(`Now Playing: ${station.name}`, {
+        description: "Stream connecting... (preview)",
+      });
+    }
     setTimeout(() => setPlaying(false), 1500);
   };
 

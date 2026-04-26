@@ -3,6 +3,7 @@ export interface Station {
   name: string;
   tagline: string;
   description: string;
+  streamUrl?: string;
   gradient: string;
   initials: string;
   coverImage: string;
@@ -14,7 +15,8 @@ export const stations: Station[] = [
     slug: "good-to-go-radio",
     name: "Good To Go Radio",
     tagline: "The Flagship",
-    description: "The heartbeat of the network — the best in music, talk, and culture, broadcasting around the clock.",
+    description: "Host Gregory Buckles leads the flagship of the network with talk, music, activism, gospel, blues, and real community voices. Where community meets rhythm — and change becomes sound.",
+    streamUrl: "https://c38.radioboss.fm/stream/310",
     gradient: "from-amber-500 via-yellow-500 to-amber-700",
     initials: "GTG",
     coverImage: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1200&q=80",
@@ -24,7 +26,8 @@ export const stations: Station[] = [
     slug: "good-trouble-podcast",
     name: "Good Trouble Podcast",
     tagline: "Bold Conversations",
-    description: "Honest conversations on the issues that move communities forward.",
+    description: "Gregory Buckles with Timeka Garrett explore activism, justice, leadership, and the journeys of entrepreneurs who stepped out on faith. Inspired by Congressman John Lewis and grounded in authenticity.",
+    streamUrl: "https://us1.streamingpulse.com:2199/start/gregory",
     gradient: "from-yellow-600 via-amber-600 to-orange-700",
     initials: "GT",
     coverImage: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?auto=format&fit=crop&w=1200&q=80",
@@ -34,7 +37,8 @@ export const stations: Station[] = [
     slug: "wesleyan-forever-radio",
     name: "Wesleyan Forever Radio",
     tagline: "Faith & Heritage",
-    description: "Inspirational programming celebrating tradition, faith, and community.",
+    description: "Kenneth Rouche brings faithful, musical, and powerfully spiritual gospel choir radio 24/7. A dedicated home for worship, choir favorites, and uplifting praise from wesleyanforever.com.",
+    streamUrl: "https://s2.radio.co/seed639db7/listen",
     gradient: "from-amber-400 via-yellow-600 to-yellow-800",
     initials: "WF",
     coverImage: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=1200&q=80",
@@ -44,7 +48,8 @@ export const stations: Station[] = [
     slug: "the-golden-boy-blues-radio",
     name: "The Golden Boy Blues Radio",
     tagline: "Pure Blues",
-    description: "All blues, all day. Classic legends and rising names of the genre.",
+    description: "Hosted by Leonard \"The Golden Boy\" McMorris, this station delivers signature blues style and fire from the heart of the blues scene 24/7. Follow at facebook.com/bernard.goldenboy.",
+    streamUrl: "https://streamer.radio.co/sc7b42122c/listen",
     gradient: "from-yellow-500 via-amber-700 to-stone-800",
     initials: "GB",
     coverImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
@@ -54,7 +59,8 @@ export const stations: Station[] = [
     slug: "mr-world-famous",
     name: "Mr. World Famous",
     tagline: "Global Hits",
-    description: "Worldwide hits, exclusive interviews, and the sounds of the streets.",
+    description: "Mr. World Famous, also known as Stanley Specks and Mr. Naudy Naudy, blends Southern Soul, R&B, Old School, Hip Hop, and entertainment with a mission to inspire, entertain, and elevate through music and media.",
+    streamUrl: "https://us1.streamingpulse.com/stream/soulbluesnetworkradio",
     gradient: "from-amber-500 via-orange-600 to-red-800",
     initials: "MW",
     coverImage: "https://images.unsplash.com/photo-1496293455970-f8581aae0e3b?auto=format&fit=crop&w=1200&q=80",
