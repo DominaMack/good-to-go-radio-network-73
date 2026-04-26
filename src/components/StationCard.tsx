@@ -11,6 +11,7 @@ interface Props {
 
 const StationCard = ({ station, variant = "compact" }: Props) => {
   const [playing, setPlaying] = useState(false);
+  const compactName = station.name.replace(" Radio", "\nRadio");
 
   const handlePlay = () => {
     setPlaying(true);
@@ -22,32 +23,40 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
 
   return (
     <div className="station-card group">
-      <div className="relative aspect-square overflow-hidden bg-card">
+      <div className="relative aspect-square overflow-hidden bg-[#050505]">
         <img
           src={station.coverImage}
           alt={`${station.name} cover art`}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           style={{ objectPosition: station.coverPosition ?? "center" }}
           loading="lazy"
         />
-        <div className={cn("absolute inset-0 bg-gradient-to-t", station.gradient, "opacity-35")} />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,5,0.2)_0%,rgba(5,5,5,0.45)_35%,rgba(5,5,5,0.92)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,214,102,0.28),transparent_45%)]" />
+        <div className={cn("absolute inset-0 bg-gradient-to-br", station.gradient, "opacity-20 mix-blend-screen")} />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.46)_0%,rgba(0,0,0,0.34)_26%,rgba(0,0,0,0.72)_60%,rgba(0,0,0,0.96)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(255,200,70,0.28),transparent_34%)]" />
+        <div className="absolute inset-[8px] rounded-[0.9rem] border border-primary/40 bg-transparent shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35)]" />
 
         <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
-            <span className="font-condensed text-[10px] uppercase tracking-[0.25em] text-background/85 bg-background/10 backdrop-blur-sm px-2 py-1 rounded-full border border-background/15">
+            <span className="font-condensed text-[10px] uppercase tracking-[0.25em] text-white bg-black/45 backdrop-blur-sm px-2 py-1 rounded-full border border-white/10 shadow-md">
               ● Live
             </span>
-            <span className="rounded-full border border-primary/40 bg-background/55 px-3 py-1 font-condensed text-[10px] uppercase tracking-[0.35em] text-primary shadow-gold">
+            <span className="rounded-full border border-primary/50 bg-black/55 px-3 py-1 font-condensed text-[10px] uppercase tracking-[0.35em] text-primary shadow-gold">
               {station.initials}
             </span>
           </div>
 
           <div className="space-y-3">
-            <div>
-              <p className="font-condensed text-[11px] uppercase tracking-[0.32em] text-primary/90">{station.tagline}</p>
-              <h3 className="mt-2 font-display text-2xl leading-[0.95] text-background drop-shadow-lg">{station.name}</h3>
+            <div className="rounded-xl border border-primary/35 bg-black/58 px-4 py-3 backdrop-blur-[2px] shadow-[0_12px_28px_rgba(0,0,0,0.38)]">
+              <p className="font-condensed text-[10px] uppercase tracking-[0.34em] text-primary">{station.tagline}</p>
+              <h3
+                className={cn(
+                  "mt-2 whitespace-pre-line font-display uppercase leading-[0.92] text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]",
+                  variant === "compact" ? "text-[1.7rem]" : "text-2xl"
+                )}
+              >
+                {variant === "compact" ? compactName : station.name}
+              </h3>
             </div>
 
             <div className="h-px w-full bg-gradient-to-r from-primary via-primary/40 to-transparent" />
