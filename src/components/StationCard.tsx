@@ -11,7 +11,7 @@ interface Props {
 
 const StationCard = ({ station, variant = "compact" }: Props) => {
   const [playing, setPlaying] = useState(false);
-  const compactName = station.name.replace(" Radio", "\nRadio");
+  const isLongName = station.name.length > 22;
 
   const handlePlay = () => {
     setPlaying(true);
@@ -51,11 +51,17 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
               <p className="font-condensed text-[10px] uppercase tracking-[0.34em] text-primary">{station.tagline}</p>
               <h3
                 className={cn(
-                  "mt-2 whitespace-pre-line font-display uppercase leading-[0.92] text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]",
-                  variant === "compact" ? "text-[1.7rem]" : "text-2xl"
+                  "mt-2 font-display uppercase text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]",
+                  variant === "compact"
+                    ? isLongName
+                      ? "text-[1.3rem] leading-[0.98]"
+                      : "text-[1.7rem] leading-[0.92]"
+                    : isLongName
+                      ? "text-xl leading-tight"
+                      : "text-2xl leading-[0.95]"
                 )}
               >
-                {variant === "compact" ? compactName : station.name}
+                {station.name}
               </h3>
             </div>
 
