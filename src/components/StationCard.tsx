@@ -1,8 +1,9 @@
-import { Play } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import type { Station } from "@/data/stations";
 import { toast } from "sonner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface Props {
   station: Station;
@@ -31,6 +32,11 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
   return (
     <div className="station-card group">
       <div className="relative aspect-square overflow-hidden bg-[#050505]">
+        <Link
+          to={`/stations/${station.slug}`}
+          aria-label={`View ${station.name}`}
+          className="absolute inset-0 z-10"
+        />
         <img
           src={station.coverImage}
           alt={`${station.name} cover art`}
@@ -79,7 +85,7 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
         <button
           onClick={handlePlay}
           aria-label={`Play ${station.name}`}
-          className="absolute inset-0 grid place-items-center bg-background/0 group-hover:bg-background/30 transition-all duration-500"
+          className="absolute inset-0 z-20 grid place-items-center bg-background/0 group-hover:bg-background/30 transition-all duration-500"
         >
           <span className={`h-16 w-16 rounded-full bg-primary text-primary-foreground grid place-items-center scale-0 group-hover:scale-100 transition-transform duration-500 shadow-gold-strong ${playing ? 'animate-pulse-gold' : ''}`}>
             <Play className="h-7 w-7 fill-current ml-1" />
@@ -90,12 +96,20 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
       {variant === "detailed" && (
         <div className="p-5 space-y-3">
           <p className="text-sm text-muted-foreground line-clamp-2">{station.description}</p>
-          <button
-            onClick={handlePlay}
-            className="w-full py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-          >
-            <Play className="h-3 w-3 fill-current" /> Listen Now
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link
+              to={`/stations/${station.slug}`}
+              className="w-full py-2 rounded-md border border-border text-foreground hover:border-primary/50 hover:text-primary transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+            >
+              <ArrowRight className="h-3 w-3" /> View Station
+            </Link>
+            <button
+              onClick={handlePlay}
+              className="w-full py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+            >
+              <Play className="h-3 w-3 fill-current" /> Listen Now
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -11,6 +11,7 @@ import Advertise from "./pages/Advertise.tsx";
 import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import StationDetail from "./pages/StationDetail.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/listen" element={<Listen />} />
           <Route path="/stations" element={<Stations />} />
+          <Route path="/stations/:slug" element={<StationDetail />} />
           <Route path="/start-your-station" element={<StartYourStation />} />
           <Route path="/advertise" element={<Advertise />} />
           <Route path="/about" element={<About />} />

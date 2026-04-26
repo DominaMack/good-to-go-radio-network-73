@@ -1,0 +1,140 @@
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, ArrowRight, Mic, Play, Radio, ShieldAlert } from "lucide-react";
+import Layout from "@/components/Layout";
+import StationCard from "@/components/StationCard";
+import { Button } from "@/components/ui/button";
+import { findStationBySlug, isStationPublic, publicStations } from "@/data/stations";
+import NotFound from "./NotFound";
+
+const StationDetail = () => {
+  const { slug } = useParams();
+  const station = slug ? findStationBySlug(slug) : undefined;
+
+  if (!station) return <NotFound />;
+
+  const relatedStations = publicStations
+    .filter((candidate) => candidate.slug !== station.slug)
+    .slice(0, 3);
+
+  const unavailable = !isStationPublic(station);
+
+  return (
+    <Layout>
+      <section className="relative overflow-hidden border-b border-border bg-charcoal-deep">
+        <div className="absolute inset-0">
+          <img
+            src={station.coverImage}
+            alt={`${station.name} station artwork`}
+            className="h-full w-full object-cover opacity-30"
+            style={{ objectPosition: station.coverPosition ?? "center" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/92 to-background/55" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/80" />
+        </div>
+
+        <div className="container-custom relative py-16 md:py-24">
+          <Link to="/stations" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Back to stations
+          </Link>
+
+          <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_380px] items-start">
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-condensed text-xs uppercase tracking-[0.3em] text-primary">
+                  {station.tier} slot
+                </span>
+                <span className="rounded-full border border-border bg-background/50 px-3 py-1 font-condensed text-xs uppercase tracking-[0.3em] text-foreground/80">
+                  {station.genre ?? station.tagline}
+                </span>
+                {unavailable && (
+                  <span className="rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 font-condensed text-xs uppercase tracking-[0.3em] text-destructive">
+                    Currently unavailable
+                  </span>
+                )}
+              </div>
+
+              <h1 className="mt-6 font-display text-5xl md:text-7xl leading-none">{station.name}</h1>
+              <p className="mt-4 font-condensed text-sm uppercase tracking-[0.32em] text-primary">
+                Hosted by {station.hostName ?? "Good To Go Radio"}
+              </p>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                {station.description}
+              </p>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                {station.streamUrl && !unavailable ? (
+                  <Button asChild size="lg" className="bg-gradient-gold-bright text-background font-condensed uppercase tracking-wider shadow-gold-strong">
+                    <a href={station.streamUrl} target="_blank" rel="noreferrer">
+                      <Play className="mr-2 h-5 w-5 fill-current" /> Listen Live
+                    </a>
+                  </Button>
+                ) : (
+                  <Button size="lg" disabled className="font-condensed uppercase tracking-wider">
+                    <ShieldAlert className="mr-2 h-5 w-5" /> Station Unavailable
+                  </Button>
+                )}
+
+                <Button asChild size="lg" variant="outline" className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground font-condensed uppercase tracking-wider">
+                  <Link to="/start-your-station">
+                    <Mic className="mr-2 h-5 w-5" /> Start Your Station
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-primary/25 bg-card/80 p-6 shadow-gold backdrop-blur-sm">
+              <div className="aspect-square overflow-hidden rounded-xl border border-primary/20">
+                <img
+                  src={station.coverImage}
+                  alt={`${station.name} cover`}
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: station.coverPosition ?? "center" }}
+                />
+              </div>
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Radio className="h-4 w-4 text-primary" />
+                  <span>{station.genre ?? station.tagline}</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Mic className="h-4 w-4 text-primary" />
+                  <span>{station.hostName ?? "Host to be announced"}</span>
+                </div>
+                <div className="rounded-xl border border-border bg-background/50 p-4">
+                  <p className="font-condensed text-xs uppercase tracking-[0.32em] text-primary">Billing Control</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    To disable this station for non-payment later, change its <code>billingStatus</code> from <code>paid</code> to <code>past_due</code> or <code>cancelled</code> in the station data.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-background py-20">
+        <div className="container-custom">
+          <div className="mb-10 flex items-end justify-between gap-4">
+            <div>
+              <p className="font-condensed text-xs uppercase tracking-[0.3em] text-primary">More From The Network</p>
+              <h2 className="mt-3 font-display text-4xl md:text-5xl">Explore Other Stations</h2>
+            </div>
+            <Button asChild variant="outline" className="hidden md:inline-flex border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground font-condensed uppercase tracking-wider">
+              <Link to="/stations">
+                View All Stations <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedStations.map((related) => (
+              <StationCard key={related.slug} station={related} variant="detailed" />
+            ))}
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+};
+
+export default StationDetail;

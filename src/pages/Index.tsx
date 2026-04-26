@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import StationCard from "@/components/StationCard";
 import SectionHeading from "@/components/SectionHeading";
 import { Button } from "@/components/ui/button";
-import { stations } from "@/data/stations";
+import { FEATURED_HOMEPAGE_LIMIT, homepageFeaturedStations } from "@/data/stations";
 import heroStudio from "@/assets/hero-studio.jpg";
 import waveform from "@/assets/waveform.jpg";
 import startStation from "@/assets/start-station.jpg";
@@ -159,11 +159,11 @@ const Index = () => {
         <div className="container-custom">
           <SectionHeading
             eyebrow="Tune In To Our Network"
-            title="Our Radio Stations"
-            subtitle="Ten distinctive stations. One unmistakable network. Press play and feel it."
+            title="Featured Radio Stations"
+            subtitle={`Our homepage spotlights ${FEATURED_HOMEPAGE_LIMIT} featured stations at a time, curated to highlight the strongest voices on the network.`}
           />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-            {stations.map((s) => <StationCard key={s.slug} station={s} />)}
+            {homepageFeaturedStations.map((s) => <StationCard key={s.slug} station={s} />)}
           </div>
           <div className="mt-12 text-center">
             <Button asChild size="lg" variant="outline" className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground font-condensed uppercase tracking-wider">
