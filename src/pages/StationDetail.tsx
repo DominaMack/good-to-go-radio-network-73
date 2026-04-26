@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Mic, Play, Radio, ShieldAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Facebook, Globe, Instagram, Mic, Play, Radio, ShieldAlert, Youtube } from "lucide-react";
 import { useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import StationCard from "@/components/StationCard";
@@ -21,6 +21,29 @@ const StationDetail = () => {
 
   const unavailable = !isStationPublic(station);
   const shouldAutoplay = searchParams.get("play") === "1";
+  const socialLinks = [
+    station.socialLinks?.website
+      ? { key: "website", label: "Website", href: station.socialLinks.website, icon: Globe }
+      : null,
+    station.socialLinks?.facebook
+      ? { key: "facebook", label: "Facebook", href: station.socialLinks.facebook, icon: Facebook }
+      : null,
+    station.socialLinks?.instagram
+      ? { key: "instagram", label: "Instagram", href: station.socialLinks.instagram, icon: Instagram }
+      : null,
+    station.socialLinks?.youtube
+      ? { key: "youtube", label: "YouTube", href: station.socialLinks.youtube, icon: Youtube }
+      : null,
+    station.socialLinks?.tiktok
+      ? { key: "tiktok", label: "TikTok", href: station.socialLinks.tiktok, icon: ExternalLink }
+      : null,
+    station.socialLinks?.vimeo
+      ? { key: "vimeo", label: "Vimeo", href: station.socialLinks.vimeo, icon: ExternalLink }
+      : null,
+    station.socialLinks?.odysee
+      ? { key: "odysee", label: "Odysee", href: station.socialLinks.odysee, icon: ExternalLink }
+      : null,
+  ].filter(Boolean) as Array<{ key: string; label: string; href: string; icon: typeof Globe }>;
 
   useEffect(() => {
     if (!shouldAutoplay || unavailable || !playerRef.current) return;
@@ -136,12 +159,28 @@ const StationDetail = () => {
                   <Mic className="h-4 w-4 text-primary" />
                   <span>{station.hostName ?? "Host to be announced"}</span>
                 </div>
-                <div className="rounded-xl border border-border bg-background/50 p-4">
-                  <p className="font-condensed text-xs uppercase tracking-[0.32em] text-primary">Billing Control</p>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    To disable this station for non-payment later, change its <code>billingStatus</code> from <code>paid</code> to <code>past_due</code> or <code>cancelled</code> in the station data.
-                  </p>
-                </div>
+                {socialLinks.length > 0 && (
+                  <div className="rounded-xl border border-border bg-background/50 p-4">
+                    <p className="font-condensed text-xs uppercase tracking-[0.32em] text-primary">Connect With This Station</p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      {socialLinks.map((social) => {
+                        const Icon = social.icon;
+                        return (
+                          <a
+                            key={social.key}
+                            href={social.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full border border-primary/30 px-3 py-2 text-sm text-foreground transition-colors hover:border-primary hover:text-primary"
+                          >
+                            <Icon className="h-4 w-4" />
+                            <span>{social.label}</span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

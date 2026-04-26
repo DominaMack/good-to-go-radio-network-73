@@ -13,6 +13,15 @@ export interface Station {
   homepageRank?: number;
   status: "draft" | "active" | "paused";
   billingStatus: "paid" | "past_due" | "cancelled";
+  socialLinks?: {
+    website?: string;
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+    vimeo?: string;
+    odysee?: string;
+  };
   gradient: string;
   initials: string;
   coverImage: string;
@@ -77,6 +86,9 @@ export const stations: Station[] = [
     homepageRank: 3,
     status: "active",
     billingStatus: "paid",
+    socialLinks: {
+      website: "https://wesleyanforever.com",
+    },
     gradient: "from-amber-400 via-yellow-600 to-yellow-800",
     initials: "WF",
     coverImage: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=1200&q=80",
@@ -97,6 +109,9 @@ export const stations: Station[] = [
     homepageRank: 4,
     status: "active",
     billingStatus: "paid",
+    socialLinks: {
+      facebook: "https://facebook.com/bernard.goldenboy",
+    },
     gradient: "from-yellow-500 via-amber-700 to-stone-800",
     initials: "GB",
     coverImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
