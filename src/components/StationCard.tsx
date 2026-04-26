@@ -3,7 +3,7 @@ import type { Station } from "@/data/stations";
 import { toast } from "sonner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface Props {
   station: Station;
@@ -13,13 +13,14 @@ interface Props {
 const StationCard = ({ station, variant = "compact" }: Props) => {
   const [playing, setPlaying] = useState(false);
   const isLongName = station.name.length > 22;
+  const navigate = useNavigate();
 
   const handlePlay = () => {
     setPlaying(true);
     if (station.streamUrl) {
-      window.open(station.streamUrl, "_blank", "noopener,noreferrer");
-      toast.success(`Opening ${station.name}`, {
-        description: "Launching the live stream in a new tab.",
+      navigate(`/stations/${station.slug}?play=1`);
+      toast.success(`Loading ${station.name}`, {
+        description: "Opening the station player on this site.",
       });
     } else {
       toast.success(`Now Playing: ${station.name}`, {

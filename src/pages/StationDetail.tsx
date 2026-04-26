@@ -1,5 +1,6 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Mic, Play, Radio, ShieldAlert } from "lucide-react";
+import { useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import StationCard from "@/components/StationCard";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,9 @@ import NotFound from "./NotFound";
 
 const StationDetail = () => {
   const { slug } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const station = slug ? findStationBySlug(slug) : undefined;
+  const playerRef = useRef<HTMLAudioElement | null>(null);
 
   if (!station) return <NotFound />;
 
@@ -17,6 +20,23 @@ const StationDetail = () => {
     .slice(0, 3);
 
   const unavailable = !isStationPublic(station);
+  const shouldAutoplay = searchParams.get("play") === "1";
+
+  useEffect(() => {
+    if (!shouldAutoplay || unavailable || !playerRef.current) return;
+
+    playerRef.current.play().catch(() => {
+      // Some browsers may still require another direct interaction.
+    });
+  }, [shouldAutoplay, unavailable, station.slug]);
+
+  const handleListenOnSite = () => {
+    setSearchParams({ play: "1" });
+    playerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    playerRef.current?.play().catch(() => {
+      // Some browsers may still require another direct interaction.
+    });
+  };
 
   return (
     <Layout>
@@ -63,10 +83,12 @@ const StationDetail = () => {
 
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 {station.streamUrl && !unavailable ? (
-                  <Button asChild size="lg" className="bg-gradient-gold-bright text-background font-condensed uppercase tracking-wider shadow-gold-strong">
-                    <a href={station.streamUrl} target="_blank" rel="noreferrer">
-                      <Play className="mr-2 h-5 w-5 fill-current" /> Listen Live
-                    </a>
+                  <Button
+                    size="lg"
+                    onClick={handleListenOnSite}
+                    className="bg-gradient-gold-bright text-background font-condensed uppercase tracking-wider shadow-gold-strong"
+                  >
+                    <Play className="mr-2 h-5 w-5 fill-current" /> Listen Live
                   </Button>
                 ) : (
                   <Button size="lg" disabled className="font-condensed uppercase tracking-wider">
@@ -92,6 +114,20 @@ const StationDetail = () => {
                 />
               </div>
               <div className="mt-6 space-y-4">
+                {station.streamUrl && !unavailable && (
+                  <div className="rounded-xl border border-primary/25 bg-background/60 p-4">
+                    <p className="font-condensed text-xs uppercase tracking-[0.32em] text-primary">Now Playing On Site</p>
+                    <audio
+                      ref={playerRef}
+                      className="mt-4 w-full"
+                      controls
+                      preload="none"
+                      src={station.streamUrl}
+                    >
+                      Your browser does not support the audio player.
+                    </audio>
+                  </div>
+                )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <Radio className="h-4 w-4 text-primary" />
                   <span>{station.genre ?? station.tagline}</span>
