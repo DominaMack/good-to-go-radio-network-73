@@ -31,6 +31,9 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
   };
 
   return (
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     <div className="station-card group">
       <div className="relative aspect-square overflow-hidden bg-[#050505]">
         <Link
@@ -82,18 +85,71 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
             <div className="h-px w-full bg-gradient-to-r from-primary via-primary/40 to-transparent" />
           </div>
         </div>
+=======
+    <article className="station-card group">
+      <div className="relative aspect-square overflow-hidden rounded-xl border border-primary/40">
+        <img
+          src={station.coverImage}
+          alt={`${station.name} cover art`}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/25 transition-colors duration-500" />
+>>>>>>> theirs
+=======
+    <article className="station-card group">
+      <div className="relative aspect-square overflow-hidden rounded-xl border border-primary/40">
+        <img
+          src={station.coverImage}
+          alt={`${station.name} cover art`}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/25 transition-colors duration-500" />
+>>>>>>> theirs
+=======
+    <article className="station-card group">
+      <div className="relative aspect-square overflow-hidden rounded-xl border border-primary/40">
+        <img
+          src={station.coverImage}
+          alt={`${station.name} cover art`}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+
+        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/25 transition-colors duration-500" />
+>>>>>>> theirs
 
         <button
           onClick={handlePlay}
           aria-label={`Play ${station.name}`}
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
           className="absolute inset-0 z-20 grid place-items-center bg-background/0 group-hover:bg-background/30 transition-all duration-500"
+=======
+          className="absolute inset-0 grid place-items-center"
+>>>>>>> theirs
+=======
+          className="absolute inset-0 grid place-items-center"
+>>>>>>> theirs
+=======
+          className="absolute inset-0 grid place-items-center"
+>>>>>>> theirs
         >
-          <span className={`h-16 w-16 rounded-full bg-primary text-primary-foreground grid place-items-center scale-0 group-hover:scale-100 transition-transform duration-500 shadow-gold-strong ${playing ? 'animate-pulse-gold' : ''}`}>
-            <Play className="h-7 w-7 fill-current ml-1" />
+          <span
+            className={`h-14 w-14 rounded-full border border-primary/80 bg-background/85 text-primary grid place-items-center scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500 shadow-gold-strong ${playing ? "animate-pulse-gold" : ""}`}
+          >
+            <Play className="h-6 w-6 fill-current ml-0.5" />
           </span>
         </button>
       </div>
 
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
       {variant === "detailed" && (
         <div className="p-5 space-y-3">
           <p className="text-sm text-muted-foreground line-clamp-2">{station.description}</p>
@@ -104,16 +160,54 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
             >
               <ArrowRight className="h-3 w-3" /> View Station
             </Link>
+=======
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+      <div className="p-4 space-y-2">
+        <p className="font-condensed text-xs uppercase tracking-[0.24em] text-primary/80">{station.tagline}</p>
+        <h3 className="font-display text-2xl leading-tight">{station.name}</h3>
+
+        {variant === "detailed" && (
+          <>
+            <p className="text-sm text-muted-foreground line-clamp-2">{station.description}</p>
+<<<<<<< ours
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
             <button
               onClick={handlePlay}
               className="w-full py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
             >
               <Play className="h-3 w-3 fill-current" /> Listen Now
             </button>
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
           </div>
         </div>
       )}
     </div>
+=======
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+          </>
+        )}
+      </div>
+    </article>
+<<<<<<< ours
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
   );
 };
 

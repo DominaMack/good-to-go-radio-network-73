@@ -25,7 +25,16 @@ export interface Station {
   gradient: string;
   initials: string;
   coverImage: string;
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
   coverPosition?: string;
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
 }
 
 export const FEATURED_HOMEPAGE_LIMIT = 10;
@@ -49,7 +58,16 @@ export const stations: Station[] = [
     gradient: "from-amber-500 via-yellow-500 to-amber-700",
     initials: "GTG",
     coverImage: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=1200&q=80",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverPosition: "center",
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
   },
   {
     id: "station-good-trouble-podcast",
@@ -69,7 +87,16 @@ export const stations: Station[] = [
     gradient: "from-yellow-600 via-amber-600 to-orange-700",
     initials: "GT",
     coverImage: "https://images.unsplash.com/photo-1589903308904-1010c2294adc?auto=format&fit=crop&w=1200&q=80",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverPosition: "center",
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
   },
   {
     id: "station-wesleyan-forever-radio",
@@ -92,7 +119,16 @@ export const stations: Station[] = [
     gradient: "from-amber-400 via-yellow-600 to-yellow-800",
     initials: "WF",
     coverImage: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=1200&q=80",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverPosition: "center",
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
   },
   {
     id: "station-the-golden-boy-blues-radio",
@@ -114,8 +150,20 @@ export const stations: Station[] = [
     },
     gradient: "from-yellow-500 via-amber-700 to-stone-800",
     initials: "GB",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
     coverPosition: "center",
+=======
+    coverImage: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
   },
   {
     id: "station-mr-world-famous",
@@ -134,8 +182,20 @@ export const stations: Station[] = [
     billingStatus: "paid",
     gradient: "from-amber-500 via-orange-600 to-red-800",
     initials: "MW",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverImage: "https://images.unsplash.com/photo-1496293455970-f8581aae0e3b?auto=format&fit=crop&w=1200&q=80",
     coverPosition: "center",
+=======
+    coverImage: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
   },
   {
     id: "station-judge-ej-russell",
@@ -153,8 +213,20 @@ export const stations: Station[] = [
     billingStatus: "paid",
     gradient: "from-yellow-600 via-amber-700 to-zinc-900",
     initials: "EJ",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverImage: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80",
     coverPosition: "center",
+=======
+    coverImage: "https://images.unsplash.com/photo-1453873531674-2151bcd01707?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1453873531674-2151bcd01707?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1453873531674-2151bcd01707?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
   },
   {
     id: "station-praise-101-radio",
@@ -172,8 +244,20 @@ export const stations: Station[] = [
     billingStatus: "paid",
     gradient: "from-amber-400 via-yellow-500 to-amber-700",
     initials: "P101",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverImage: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=80",
     coverPosition: "center",
+=======
+    coverImage: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
   },
   {
     id: "station-katrinia-williams-show",
@@ -191,8 +275,20 @@ export const stations: Station[] = [
     billingStatus: "paid",
     gradient: "from-orange-500 via-amber-600 to-yellow-700",
     initials: "KW",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverImage: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80",
     coverPosition: "center",
+=======
+    coverImage: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
   },
   {
     id: "station-jazz-radio",
@@ -211,7 +307,16 @@ export const stations: Station[] = [
     gradient: "from-yellow-700 via-amber-800 to-stone-900",
     initials: "JZ",
     coverImage: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=1200&q=80",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverPosition: "center",
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
   },
   {
     id: "station-5-strong-radio",
@@ -229,8 +334,20 @@ export const stations: Station[] = [
     billingStatus: "paid",
     gradient: "from-amber-600 via-yellow-700 to-amber-900",
     initials: "5S",
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     coverImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
     coverPosition: "center",
+=======
+    coverImage: "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
+=======
+    coverImage: "https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&fit=crop&w=1200&q=80",
+>>>>>>> theirs
   },
 ];
 
