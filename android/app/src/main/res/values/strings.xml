@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Good To Go Radio</string>
+    <string name="title_activity_main">Good To Go Radio</string>
+    <string name="package_name">com.goodtogoradio.app</string>
+    <string name="custom_url_scheme">com.goodtogoradio.app</string>
+</resources>

@@ -5,6 +5,7 @@ import Layout from "@/components/Layout";
 import StationCard from "@/components/StationCard";
 import { Button } from "@/components/ui/button";
 import { findStationBySlug, isStationPublic, publicStations } from "@/data/stations";
+import { useStationMediaSession } from "@/hooks/use-station-media-session";
 import NotFound from "./NotFound";
 
 const StationDetail = () => {
@@ -21,6 +22,7 @@ const StationDetail = () => {
 
   const unavailable = !isStationPublic(station);
   const shouldAutoplay = searchParams.get("play") === "1";
+  const mediaSessionEnabled = Boolean(station.streamUrl && !unavailable);
   const socialLinks = [
     station.socialLinks?.website
       ? { key: "website", label: "Website", href: station.socialLinks.website, icon: Globe }
@@ -52,6 +54,8 @@ const StationDetail = () => {
       // Some browsers may still require another direct interaction.
     });
   }, [shouldAutoplay, unavailable, station.slug]);
+
+  useStationMediaSession(playerRef, station, mediaSessionEnabled);
 
   const handleListenOnSite = () => {
     setSearchParams({ play: "1" });
@@ -144,6 +148,7 @@ const StationDetail = () => {
                       ref={playerRef}
                       className="mt-4 w-full"
                       controls
+                      playsInline
                       preload="none"
                       src={station.streamUrl}
                     >

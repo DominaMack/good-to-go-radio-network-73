@@ -1,0 +1,83 @@
+name: Android Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build output to generate"
+        required: true
+        default: "bundleRelease"
+        type: choice
+        options:
+          - bundleRelease
+          - assembleDebug
+      version_name:
+        description: "Android versionName"
+        required: true
+        default: "1.0.0"
+      version_code:
+        description: "Android versionCode"
+        required: true
+        default: "1"
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web app and sync Capacitor
+        env:
+          GTG_VERSION_NAME: ${{ inputs.version_name }}
+          GTG_VERSION_CODE: ${{ inputs.version_code }}
+        run: npm run build:mobile
+
+      - name: Decode Android release keystore
+        if: ${{ inputs.build_type == 'bundleRelease' }}
+        env:
+          GTG_ANDROID_KEYSTORE_BASE64: ${{ secrets.GTG_ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$GTG_ANDROID_KEYSTORE_BASE64"
+          echo "$GTG_ANDROID_KEYSTORE_BASE64" | base64 --decode > android/release-keystore.jks
+
+      - name: Build Android artifact
+        working-directory: android
+        env:
+          GTG_VERSION_NAME: ${{ inputs.version_name }}
+          GTG_VERSION_CODE: ${{ inputs.version_code }}
+          GTG_UPLOAD_STORE_FILE: release-keystore.jks
+          GTG_UPLOAD_STORE_PASSWORD: ${{ secrets.GTG_UPLOAD_STORE_PASSWORD }}
+          GTG_UPLOAD_KEY_ALIAS: ${{ secrets.GTG_UPLOAD_KEY_ALIAS }}
+          GTG_UPLOAD_KEY_PASSWORD: ${{ secrets.GTG_UPLOAD_KEY_PASSWORD }}
+        run: ./gradlew ${{ inputs.build_type }}
+
+      - name: Upload Android bundle
+        if: ${{ inputs.build_type == 'bundleRelease' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: good-to-go-radio-aab-${{ inputs.version_name }}
+          path: android/app/build/outputs/bundle/release/*.aab
+
+      - name: Upload debug APK
+        if: ${{ inputs.build_type == 'assembleDebug' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: good-to-go-radio-apk-${{ inputs.version_name }}
+          path: android/app/build/outputs/apk/debug/*.apk
