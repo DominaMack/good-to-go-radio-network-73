@@ -37,7 +37,7 @@ const adOptions = [
 ];
 
 const stats = [
-  { value: "10+", label: "Radio Stations" },
+  { value: "11+", label: "Radio Stations" },
   { value: "50K+", label: "Monthly Listeners" },
   { value: "100+", label: "Countries" },
   { value: "24/7", label: "Streaming" },

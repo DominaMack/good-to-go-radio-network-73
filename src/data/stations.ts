@@ -6,6 +6,7 @@ export interface Station {
   genre?: string;
   tagline: string;
   description: string;
+  contactEmail?: string;
   streamUrl?: string;
   tier: "standard" | "featured" | "premium";
   featured: boolean;
@@ -230,6 +231,26 @@ export const stations: Station[] = [
     gradient: "from-amber-600 via-yellow-700 to-amber-900",
     initials: "5S",
     coverImage: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80",
+    coverPosition: "center",
+  },
+  {
+    id: "station-douglass-family-singers",
+    slug: "douglass-family-singers",
+    name: "Douglass Family Singers",
+    hostName: "Douglass Family Singers",
+    genre: "Gospel Quartet",
+    tagline: "Generations Of Praise",
+    description: "Established in 1959, the Douglass Family Singers began in the legacy of Lillie Mae and Charlie Douglass Sr., parents who both sang. Lillie Mae sang with the girls until her passing in 2000, while Charlie Douglass Sr. sang with the Five Star Jubilee. Charles Jr., Michael, and Alvin Douglass sang with family and various groups until their passing. The family continues praising the Lord across generations, and the children of the Douglass Family Singers occasionally gather as D3, the Douglass 3rd Generation of Singers. Members include Margie Moore, Glenda Buckles, Willie Mae Springs, Ivy Dowdell, and Christine Pankey.",
+    contactEmail: "thedouglassfamilysingers@gmail.com",
+    tier: "standard",
+    featured: false,
+    approved: true,
+    status: "active",
+    billingStatus: "paid",
+    socialLinks: {},
+    gradient: "from-emerald-500 via-amber-500 to-stone-900",
+    initials: "D3",
+    coverImage: "/stations/douglass-family-singers.jpg",
     coverPosition: "center",
   },
 ];

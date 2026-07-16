@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ExternalLink, Facebook, Globe, Instagram, Mic, Play, Radio, ShieldAlert, Youtube } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, ExternalLink, Facebook, Globe, Instagram, Mail, Mic, Play, Radio, ShieldAlert, Youtube } from "lucide-react";
 import { useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import StationCard from "@/components/StationCard";
@@ -13,6 +13,19 @@ const StationDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const station = slug ? findStationBySlug(slug) : undefined;
   const playerRef = useRef<HTMLAudioElement | null>(null);
+  const shouldAutoplay = searchParams.get("play") === "1";
+  const unavailable = station ? !isStationPublic(station) : true;
+  const mediaSessionEnabled = Boolean(station?.streamUrl && !unavailable);
+
+  useEffect(() => {
+    if (!station || !shouldAutoplay || unavailable || !playerRef.current) return;
+
+    playerRef.current.play().catch(() => {
+      // Some browsers may still require another direct interaction.
+    });
+  }, [shouldAutoplay, unavailable, station]);
+
+  useStationMediaSession(playerRef, station, mediaSessionEnabled);
 
   if (!station) return <NotFound />;
 
@@ -20,9 +33,6 @@ const StationDetail = () => {
     .filter((candidate) => candidate.slug !== station.slug)
     .slice(0, 3);
 
-  const unavailable = !isStationPublic(station);
-  const shouldAutoplay = searchParams.get("play") === "1";
-  const mediaSessionEnabled = Boolean(station.streamUrl && !unavailable);
   const socialLinks = [
     station.socialLinks?.website
       ? { key: "website", label: "Website", href: station.socialLinks.website, icon: Globe }
@@ -46,16 +56,6 @@ const StationDetail = () => {
       ? { key: "odysee", label: "Odysee", href: station.socialLinks.odysee, icon: ExternalLink }
       : null,
   ].filter(Boolean) as Array<{ key: string; label: string; href: string; icon: typeof Globe }>;
-
-  useEffect(() => {
-    if (!shouldAutoplay || unavailable || !playerRef.current) return;
-
-    playerRef.current.play().catch(() => {
-      // Some browsers may still require another direct interaction.
-    });
-  }, [shouldAutoplay, unavailable, station.slug]);
-
-  useStationMediaSession(playerRef, station, mediaSessionEnabled);
 
   const handleListenOnSite = () => {
     setSearchParams({ play: "1" });
@@ -98,6 +98,11 @@ const StationDetail = () => {
                     Currently unavailable
                   </span>
                 )}
+                {!unavailable && !station.streamUrl && (
+                  <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-condensed text-xs uppercase tracking-[0.3em] text-primary">
+                    Stream coming soon
+                  </span>
+                )}
               </div>
 
               <h1 className="mt-6 font-display text-5xl md:text-7xl leading-none">{station.name}</h1>
@@ -119,7 +124,12 @@ const StationDetail = () => {
                   </Button>
                 ) : (
                   <Button size="lg" disabled className="font-condensed uppercase tracking-wider">
-                    <ShieldAlert className="mr-2 h-5 w-5" /> Station Unavailable
+                    {unavailable ? (
+                      <ShieldAlert className="mr-2 h-5 w-5" />
+                    ) : (
+                      <Clock className="mr-2 h-5 w-5" />
+                    )}
+                    {unavailable ? "Station Unavailable" : "Stream Coming Soon"}
                   </Button>
                 )}
 
@@ -164,6 +174,15 @@ const StationDetail = () => {
                   <Mic className="h-4 w-4 text-primary" />
                   <span>{station.hostName ?? "Host to be announced"}</span>
                 </div>
+                {station.contactEmail && (
+                  <a
+                    href={`mailto:${station.contactEmail}`}
+                    className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <Mail className="h-4 w-4 text-primary" />
+                    <span>{station.contactEmail}</span>
+                  </a>
+                )}
                 {socialLinks.length > 0 && (
                   <div className="rounded-xl border border-border bg-background/50 p-4">
                     <p className="font-condensed text-xs uppercase tracking-[0.32em] text-primary">Connect With This Station</p>

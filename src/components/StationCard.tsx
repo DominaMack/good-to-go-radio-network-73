@@ -8,24 +8,34 @@ import { Link, useNavigate } from "react-router-dom";
 interface Props {
   station: Station;
   variant?: "compact" | "detailed";
+  interactive?: boolean;
 }
 
-const StationCard = ({ station, variant = "compact" }: Props) => {
+const StationCard = ({ station, variant = "compact", interactive = true }: Props) => {
   const [playing, setPlaying] = useState(false);
   const isLongName = station.name.length > 22;
   const navigate = useNavigate();
 
   const handlePlay = () => {
     setPlaying(true);
+    if (!interactive) {
+      toast.info(`${station.name} preview`, {
+        description: station.streamUrl ? "The stream URL is set." : "The stream URL can be added later.",
+      });
+      setTimeout(() => setPlaying(false), 1500);
+      return;
+    }
+
     if (station.streamUrl) {
       navigate(`/stations/${station.slug}?play=1`);
       toast.success(`Loading ${station.name}`, {
         description: "Opening the station player on this site.",
       });
     } else {
-      toast.success(`Now Playing: ${station.name}`, {
-        description: "Stream connecting... (preview)",
+      toast.info(`${station.name} stream coming soon`, {
+        description: "The station page is live, and the listen link can be added when it is ready.",
       });
+      navigate(`/stations/${station.slug}`);
     }
     setTimeout(() => setPlaying(false), 1500);
   };
@@ -33,11 +43,13 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
   return (
     <article className="station-card group">
       <div className="relative aspect-square overflow-hidden bg-[#050505]">
-        <Link
-          to={`/stations/${station.slug}`}
-          aria-label={`View ${station.name}`}
-          className="absolute inset-0 z-10"
-        />
+        {interactive && (
+          <Link
+            to={`/stations/${station.slug}`}
+            aria-label={`View ${station.name}`}
+            className="absolute inset-0 z-10"
+          />
+        )}
         <img
           src={station.coverImage}
           alt={`${station.name} cover art`}
@@ -85,7 +97,7 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
 
         <button
           onClick={handlePlay}
-          aria-label={`Play ${station.name}`}
+          aria-label={station.streamUrl ? `Play ${station.name}` : `View ${station.name} station`}
           className="absolute inset-0 z-20 grid place-items-center bg-background/0 group-hover:bg-background/30 transition-all duration-500"
         >
           <span
@@ -100,17 +112,23 @@ const StationCard = ({ station, variant = "compact" }: Props) => {
         <div className="p-5 space-y-3">
           <p className="text-sm text-muted-foreground line-clamp-2">{station.description}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Link
-              to={`/stations/${station.slug}`}
-              className="w-full py-2 rounded-md border border-border text-foreground hover:border-primary/50 hover:text-primary transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
-            >
-              <ArrowRight className="h-3 w-3" /> View Station
-            </Link>
+            {interactive ? (
+              <Link
+                to={`/stations/${station.slug}`}
+                className="w-full py-2 rounded-md border border-border text-foreground hover:border-primary/50 hover:text-primary transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
+              >
+                <ArrowRight className="h-3 w-3" /> View Station
+              </Link>
+            ) : (
+              <span className="w-full py-2 rounded-md border border-border text-muted-foreground font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2">
+                <ArrowRight className="h-3 w-3" /> View Station
+              </span>
+            )}
             <button
               onClick={handlePlay}
               className="w-full py-2 rounded-md border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-condensed uppercase tracking-wider text-sm flex items-center justify-center gap-2"
             >
-              <Play className="h-3 w-3 fill-current" /> Listen Now
+              <Play className="h-3 w-3 fill-current" /> {station.streamUrl ? "Listen Now" : "Coming Soon"}
             </button>
           </div>
         </div>
