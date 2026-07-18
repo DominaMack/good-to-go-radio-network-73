@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Clipboard, RotateCcw, Save, Star } from "lucide-react";
+import { Clipboard, Inbox, Lock, LogOut, RefreshCw, RotateCcw, Save, Star } from "lucide-react";
 import Layout from "@/components/Layout";
 import PageHeader from "@/components/PageHeader";
 import StationCard from "@/components/StationCard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,24 @@ type StationForm = {
   coverPosition: string;
 };
 
+type Submission = {
+  id: number;
+  number: number;
+  title: string;
+  url: string;
+  createdAt: string;
+  stationDraft?: Partial<Station>;
+  rawPayload?: Record<string, unknown>;
+};
+
+type AdminUser = {
+  name: string;
+  email: string;
+  username: string;
+};
+
 const storageKey = "good-to-go-station-admin-draft";
+const defaultAdminUsername = "Dominique.McCraney@gmail.com";
 
 const defaultForm: StationForm = {
   name: "",
@@ -128,14 +146,92 @@ const readDraft = () => {
   }
 };
 
+const stationToForm = (station: Partial<Station>): StationForm => ({
+  ...defaultForm,
+  name: station.name ?? "",
+  hostName: station.hostName ?? "",
+  genre: station.genre ?? "",
+  tagline: station.tagline ?? "",
+  description: station.description ?? "",
+  contactEmail: station.contactEmail ?? "",
+  streamUrl: station.streamUrl ?? "",
+  tier: station.tier ?? "standard",
+  featured: station.featured ?? false,
+  homepageRank: station.homepageRank ? String(station.homepageRank) : "",
+  approved: station.approved ?? false,
+  status: station.status ?? "draft",
+  billingStatus: station.billingStatus ?? "paid",
+  website: station.socialLinks?.website ?? "",
+  facebook: station.socialLinks?.facebook ?? "",
+  instagram: station.socialLinks?.instagram ?? "",
+  youtube: station.socialLinks?.youtube ?? "",
+  initials: station.initials ?? "",
+  gradient: station.gradient ?? defaultForm.gradient,
+  coverImage: station.coverImage ?? "/placeholder.svg",
+  coverPosition: station.coverPosition ?? "center",
+});
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("en", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(
+    new Date(value),
+  );
+
 const AdminStations = () => {
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [adminConfigured, setAdminConfigured] = useState(true);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [username, setUsername] = useState(defaultAdminUsername);
+  const [password, setPassword] = useState("");
+  const [loginBusy, setLoginBusy] = useState(false);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissionsMessage, setSubmissionsMessage] = useState("");
+  const [submissionsBusy, setSubmissionsBusy] = useState(false);
   const [form, setForm] = useState<StationForm>(() =>
     typeof window === "undefined" ? defaultForm : readDraft(),
   );
 
   useEffect(() => {
+    fetch("/api/admin/session")
+      .then((response) => response.json())
+      .then((data) => {
+        setAuthenticated(Boolean(data.authenticated));
+        setAdminConfigured(Boolean(data.adminConfigured));
+        setAdminUser(data.adminUser ?? null);
+        setAdminUsers(data.adminUsers ?? []);
+      })
+      .catch(() => {
+        setAdminConfigured(false);
+        setAuthenticated(false);
+      })
+      .finally(() => setAuthChecked(true));
+  }, []);
+
+  useEffect(() => {
+    if (!authenticated) return;
     window.localStorage.setItem(storageKey, JSON.stringify(form));
-  }, [form]);
+  }, [authenticated, form]);
+
+  const loadSubmissions = async () => {
+    setSubmissionsBusy(true);
+    setSubmissionsMessage("");
+    try {
+      const response = await fetch("/api/admin/station-submissions");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load submissions");
+      setSubmissions(data.submissions ?? []);
+      setSubmissionsMessage(data.message ?? "");
+    } catch (error) {
+      setSubmissionsMessage(error instanceof Error ? error.message : "Unable to load submissions");
+    } finally {
+      setSubmissionsBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated) void loadSubmissions();
+  }, [authenticated]);
 
   const slug = slugify(form.name || "new-station");
   const currentFeaturedCount = stations.filter((station) => station.featured).length;
@@ -176,6 +272,37 @@ const AdminStations = () => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
+  const login = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoginBusy(true);
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Login failed");
+      setAuthenticated(true);
+      setAdminUser(data.adminUser ?? null);
+      setPassword("");
+      toast.success("Admin unlocked");
+    } catch (error) {
+      toast.error("Login failed", {
+        description: error instanceof Error ? error.message : "Check the admin username and password.",
+      });
+    } finally {
+      setLoginBusy(false);
+    }
+  };
+
+  const logout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" }).catch(() => undefined);
+    setAuthenticated(false);
+    setAdminUser(null);
+    toast.success("Logged out");
+  };
+
   const copyStationCode = async () => {
     try {
       await navigator.clipboard.writeText(stationCode);
@@ -195,17 +322,163 @@ const AdminStations = () => {
     toast.success("Draft reset");
   };
 
+  const importSubmission = (submission: Submission) => {
+    if (!submission.stationDraft) {
+      toast.error("Submission has no station draft");
+      return;
+    }
+
+    setForm(stationToForm(submission.stationDraft));
+    toast.success("Submission loaded", {
+      description: "Review the details, choose placement, then publish the station entry.",
+    });
+  };
+
+  if (!authChecked) {
+    return (
+      <Layout>
+        <PageHeader eyebrow="Admin" title="Checking Access" subtitle="Verifying the station admin session." />
+      </Layout>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <Layout>
+        <PageHeader
+          eyebrow="Admin"
+          title="Station Admin Login"
+          subtitle="Sign in before viewing paid station submissions or editing station drafts."
+        />
+        <section className="bg-background py-16">
+          <div className="container-custom max-w-xl">
+            {!adminConfigured && (
+              <Alert className="mb-6 border-primary/40 bg-card">
+                <Lock className="h-4 w-4 text-primary" />
+                <AlertTitle>Authentication Needs Configuration</AlertTitle>
+                <AlertDescription>
+                  Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET in the deployment environment before using this page.
+                </AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={login} className="rounded-lg border border-border bg-card p-6 space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="admin-username">Admin Username</Label>
+                <Input
+                  id="admin-username"
+                  type="email"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  disabled={!adminConfigured || loginBusy}
+                />
+                <p className="text-xs text-muted-foreground">
+                  First admin: DC McCraney, username {defaultAdminUsername}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-password">Admin Password</Label>
+                <Input
+                  id="admin-password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  disabled={!adminConfigured || loginBusy}
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={!adminConfigured || loginBusy || !username || !password}
+                className="w-full bg-gradient-gold-bright text-background font-condensed uppercase tracking-wider"
+              >
+                <Lock className="mr-2 h-4 w-4" /> {loginBusy ? "Signing In" : "Sign In"}
+              </Button>
+            </form>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <PageHeader
         eyebrow="Admin"
         title="Station Builder"
-        subtitle="Create station entries, choose tiers, and manage homepage featured slots."
+        subtitle="Load paid GHL submissions, choose tiers, and manage homepage featured slots."
       />
 
       <section className="bg-background py-12">
         <div className="container-custom grid gap-8 xl:grid-cols-[minmax(0,1fr)_420px]">
           <div className="space-y-6">
+            <div className="rounded-lg border border-border bg-card p-6">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-display text-3xl">Paid Form Submissions</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Signed in as {adminUser?.name ?? "Admin"} · GHL webhook submissions are stored as GitHub issues.
+                  </p>
+                  {adminUsers.length > 0 && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Allowed admins: {adminUsers.map((user) => user.email).join(", ")}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" onClick={loadSubmissions} disabled={submissionsBusy}>
+                    <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+                  </Button>
+                  <Button variant="outline" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  </Button>
+                </div>
+              </div>
+              {submissionsMessage && (
+                <Alert className="mb-4 border-primary/40 bg-background">
+                  <Inbox className="h-4 w-4 text-primary" />
+                  <AlertTitle>Submission Storage</AlertTitle>
+                  <AlertDescription>{submissionsMessage}</AlertDescription>
+                </Alert>
+              )}
+              <div className="space-y-3">
+                {submissions.length === 0 ? (
+                  <div className="rounded-md border border-border bg-background p-5 text-sm text-muted-foreground">
+                    No pending GHL station submissions found.
+                  </div>
+                ) : (
+                  submissions.map((submission) => (
+                    <div
+                      key={submission.id}
+                      className="flex flex-col gap-4 rounded-md border border-border bg-background p-4 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-condensed text-lg text-foreground">
+                            {submission.stationDraft?.name ?? submission.title}
+                          </p>
+                          <Badge variant="secondary">#{submission.number}</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {submission.stationDraft?.hostName ?? "Contact pending"} · {formatDate(submission.createdAt)}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => importSubmission(submission)}>
+                          Load
+                        </Button>
+                        <Button asChild variant="outline">
+                          <a href={submission.url} target="_blank" rel="noreferrer">
+                            Issue
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
             <div className="rounded-lg border border-border bg-card p-6">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                 <div>
