@@ -31,20 +31,12 @@ function env_value(string $key, string $default = ''): string {
 }
 
 function admin_auth_configured(): bool {
-    return env_value('ADMIN_PASSWORD') !== '' && env_value('ADMIN_SESSION_SECRET') !== '';
-}
-
-function default_admin_users(): array {
-    return [[
-        'name' => 'DC McCraney',
-        'email' => 'Dominique.McCraney@gmail.com',
-        'username' => 'Dominique.McCraney@gmail.com',
-    ]];
+    return env_value('ADMIN_USERS') !== '' && env_value('ADMIN_SESSION_SECRET') !== '' && env_value('GOOGLE_CLIENT_ID') !== '';
 }
 
 function admin_users(): array {
     $configured = trim(env_value('ADMIN_USERS'));
-    if ($configured === '') return default_admin_users();
+    if ($configured === '') return [];
 
     $decoded = json_decode($configured, true);
     if (is_array($decoded)) {
@@ -85,6 +77,28 @@ function find_admin_user(?string $username): ?array {
         }
     }
     return null;
+}
+
+function verify_google_credential(?string $credential): ?array {
+    if (!admin_auth_configured() || trim((string)$credential) === '') return null;
+
+    $url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . rawurlencode((string)$credential);
+    $raw = @file_get_contents($url);
+    if ($raw === false) return null;
+
+    $profile = json_decode($raw, true);
+    if (!is_array($profile)) return null;
+    if (($profile['aud'] ?? '') !== env_value('GOOGLE_CLIENT_ID')) return null;
+    if (($profile['email_verified'] ?? '') !== 'true' && ($profile['email_verified'] ?? false) !== true) return null;
+
+    $adminUser = find_admin_user($profile['email'] ?? '');
+    if (!$adminUser) return null;
+
+    return [
+        'name' => $adminUser['name'] ?: ($profile['name'] ?? $profile['email']),
+        'email' => $adminUser['email'],
+        'username' => $adminUser['username'],
+    ];
 }
 
 function sign_payload(string $payload): string {

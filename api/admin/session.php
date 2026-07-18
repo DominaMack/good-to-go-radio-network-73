@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $adminUser = get_admin_session();
 json_response(200, [
     'adminConfigured' => admin_auth_configured(),
-    'adminUsers' => $adminUser ? admin_users() : [],
+    'googleClientId' => env_value('GOOGLE_CLIENT_ID'),
     'authenticated' => (bool)$adminUser,
     'adminUser' => $adminUser,
 ]);
