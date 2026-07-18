@@ -1,4 +1,4 @@
-import { adminAuthConfigured, getAdminSession, getAdminUsers } from "../_lib/auth.js";
+import { adminAuthConfigured, getAdminSession } from "../_lib/auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -10,13 +10,7 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     adminConfigured: adminAuthConfigured(),
-    adminUsers: adminUser
-      ? getAdminUsers().map((user) => ({
-          name: user.name,
-          email: user.email,
-          username: user.username,
-        }))
-      : [],
+    googleClientId: process.env.GOOGLE_CLIENT_ID || "",
     authenticated: Boolean(adminUser),
     adminUser: adminUser || null,
   });

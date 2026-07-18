@@ -11,11 +11,10 @@ if (!admin_auth_configured()) {
 }
 
 $body = request_json();
-$adminUser = find_admin_user($body['username'] ?? '');
-$password = (string)($body['password'] ?? '');
+$adminUser = verify_google_credential($body['credential'] ?? '');
 
-if (!$adminUser || !hash_equals(env_value('ADMIN_PASSWORD'), $password)) {
-    json_response(401, ['error' => 'Invalid admin username or password']);
+if (!$adminUser) {
+    json_response(401, ['error' => 'This Google account is not authorized for admin access.']);
 }
 
 set_admin_cookie(create_admin_session($adminUser));

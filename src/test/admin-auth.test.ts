@@ -8,27 +8,18 @@ describe("admin users", () => {
     process.env.ADMIN_USERS = previousAdminUsers;
   });
 
-  it("includes DC McCraney as the default first admin", () => {
+  it("requires admins to be configured through ADMIN_USERS", () => {
     delete process.env.ADMIN_USERS;
 
-    expect(getAdminUsers()).toEqual([
-      {
-        name: "DC McCraney",
-        email: "Dominique.McCraney@gmail.com",
-        username: "Dominique.McCraney@gmail.com",
-      },
-    ]);
-    expect(findAdminUser("dominique.mccraney@gmail.com")).toMatchObject({
-      name: "DC McCraney",
-      email: "Dominique.McCraney@gmail.com",
-    });
+    expect(getAdminUsers()).toEqual([]);
+    expect(findAdminUser("admin@example.com")).toBeNull();
   });
 
   it("supports adding multiple admins through ADMIN_USERS", () => {
     process.env.ADMIN_USERS = JSON.stringify([
       {
-        name: "DC McCraney",
-        email: "Dominique.McCraney@gmail.com",
+        name: "First Admin",
+        email: "admin@example.com",
       },
       {
         name: "Second Admin",

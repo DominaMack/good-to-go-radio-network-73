@@ -2,13 +2,6 @@ import crypto from "node:crypto";
 
 const cookieName = "gtg_admin_session";
 const sessionTtlSeconds = 8 * 60 * 60;
-const defaultAdminUsers = [
-  {
-    name: "DC McCraney",
-    email: "Dominique.McCraney@gmail.com",
-    username: "Dominique.McCraney@gmail.com",
-  },
-];
 
 const base64url = (value) =>
   Buffer.from(value).toString("base64url");
@@ -35,11 +28,11 @@ export const parseCookies = (cookieHeader = "") =>
   );
 
 export const adminAuthConfigured = () =>
-  Boolean(process.env.ADMIN_PASSWORD && process.env.ADMIN_SESSION_SECRET);
+  Boolean(process.env.ADMIN_USERS && process.env.ADMIN_SESSION_SECRET && process.env.GOOGLE_CLIENT_ID);
 
 export const getAdminUsers = () => {
   const configuredUsers = process.env.ADMIN_USERS?.trim();
-  if (!configuredUsers) return defaultAdminUsers;
+  if (!configuredUsers) return [];
 
   try {
     const users = JSON.parse(configuredUsers);
@@ -85,9 +78,26 @@ export const findAdminUser = (username) => {
   );
 };
 
-export const verifyAdminPassword = (password) => {
-  if (!adminAuthConfigured()) return false;
-  return safeEqual(password ?? "", process.env.ADMIN_PASSWORD);
+export const verifyGoogleCredential = async (credential) => {
+  if (!adminAuthConfigured() || !credential) return null;
+
+  const response = await fetch(
+    `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
+  );
+  if (!response.ok) return null;
+
+  const profile = await response.json();
+  if (profile.aud !== process.env.GOOGLE_CLIENT_ID) return null;
+  if (profile.email_verified !== "true" && profile.email_verified !== true) return null;
+
+  const adminUser = findAdminUser(profile.email);
+  if (!adminUser) return null;
+
+  return {
+    name: adminUser.name || profile.name || profile.email,
+    email: adminUser.email,
+    username: adminUser.username,
+  };
 };
 
 export const createAdminSession = (adminUser) => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Clipboard, Inbox, Lock, LogOut, RefreshCw, RotateCcw, Save, Star } from "lucide-react";
 import Layout from "@/components/Layout";
 import PageHeader from "@/components/PageHeader";
@@ -61,8 +61,23 @@ type AdminUser = {
   username: string;
 };
 
+type GoogleIdentity = {
+  accounts?: {
+    id?: {
+      initialize: (options: {
+        client_id: string;
+        callback: (response: { credential?: string }) => void;
+      }) => void;
+      renderButton: (
+        parent: HTMLElement,
+        options: { theme: string; size: string; width: number; text: string },
+      ) => void;
+    };
+  };
+};
+
+const googleWindow = () => window as Window & { google?: GoogleIdentity };
 const storageKey = "good-to-go-station-admin-draft";
-const defaultAdminUsername = "Dominique.McCraney@gmail.com";
 
 const defaultForm: StationForm = {
   name: "",
@@ -181,13 +196,12 @@ const AdminStations = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [adminConfigured, setAdminConfigured] = useState(true);
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
-  const [username, setUsername] = useState(defaultAdminUsername);
-  const [password, setPassword] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
+  const [googleClientId, setGoogleClientId] = useState("");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [submissionsMessage, setSubmissionsMessage] = useState("");
   const [submissionsBusy, setSubmissionsBusy] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const [form, setForm] = useState<StationForm>(() =>
     typeof window === "undefined" ? defaultForm : readDraft(),
   );
@@ -199,7 +213,7 @@ const AdminStations = () => {
         setAuthenticated(Boolean(data.authenticated));
         setAdminConfigured(Boolean(data.adminConfigured));
         setAdminUser(data.adminUser ?? null);
-        setAdminUsers(data.adminUsers ?? []);
+        setGoogleClientId(data.googleClientId ?? "");
       })
       .catch(() => {
         setAdminConfigured(false);
@@ -232,6 +246,49 @@ const AdminStations = () => {
   useEffect(() => {
     if (authenticated) void loadSubmissions();
   }, [authenticated]);
+
+  useEffect(() => {
+    if (authenticated || !googleClientId || !googleButtonRef.current) return;
+
+    const renderGoogleButton = () => {
+      const google = googleWindow().google;
+      if (!googleButtonRef.current || !google?.accounts?.id) return;
+
+      googleButtonRef.current.innerHTML = "";
+      google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: (response: { credential?: string }) => {
+          if (response.credential) void loginWithGoogle(response.credential);
+        },
+      });
+      google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        width: 360,
+        text: "signin_with",
+      });
+    };
+
+    if (googleWindow().google?.accounts?.id) {
+      renderGoogleButton();
+      return;
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>("script[src='https://accounts.google.com/gsi/client']");
+    if (existingScript) {
+      existingScript.addEventListener("load", renderGoogleButton, { once: true });
+      return () => existingScript.removeEventListener("load", renderGoogleButton);
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", renderGoogleButton, { once: true });
+    document.head.appendChild(script);
+
+    return () => script.removeEventListener("load", renderGoogleButton);
+  }, [authenticated, googleClientId]);
 
   const slug = slugify(form.name || "new-station");
   const currentFeaturedCount = stations.filter((station) => station.featured).length;
@@ -272,24 +329,22 @@ const AdminStations = () => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const login = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const loginWithGoogle = async (credential: string) => {
     setLoginBusy(true);
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ credential }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Login failed");
       setAuthenticated(true);
       setAdminUser(data.adminUser ?? null);
-      setPassword("");
       toast.success("Admin unlocked");
     } catch (error) {
       toast.error("Login failed", {
-        description: error instanceof Error ? error.message : "Check the admin username and password.",
+        description: error instanceof Error ? error.message : "Use an authorized Google admin account.",
       });
     } finally {
       setLoginBusy(false);
@@ -357,44 +412,28 @@ const AdminStations = () => {
                 <Lock className="h-4 w-4 text-primary" />
                 <AlertTitle>Authentication Needs Configuration</AlertTitle>
                 <AlertDescription>
-                  Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET in the deployment environment before using this page.
+                  Admin sign-in is not configured yet. Ask the site owner to finish the private server settings.
                 </AlertDescription>
               </Alert>
             )}
-            <form onSubmit={login} className="rounded-lg border border-border bg-card p-6 space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="admin-username">Admin Username</Label>
-                <Input
-                  id="admin-username"
-                  type="email"
-                  autoComplete="username"
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  disabled={!adminConfigured || loginBusy}
-                />
-                <p className="text-xs text-muted-foreground">
-                  First admin: DC McCraney, username {defaultAdminUsername}
+            <div className="rounded-lg border border-border bg-card p-6 space-y-5">
+              <div>
+                <h2 className="font-display text-3xl">Secure Admin Sign In</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Use an authorized Google account to continue.
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin-password">Admin Password</Label>
-                <Input
-                  id="admin-password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  disabled={!adminConfigured || loginBusy}
-                />
+              <div className="min-h-11">
+                {adminConfigured ? (
+                  <div ref={googleButtonRef} />
+                ) : (
+                  <Button disabled className="w-full font-condensed uppercase tracking-wider">
+                    <Lock className="mr-2 h-4 w-4" /> Sign In Unavailable
+                  </Button>
+                )}
               </div>
-              <Button
-                type="submit"
-                disabled={!adminConfigured || loginBusy || !username || !password}
-                className="w-full bg-gradient-gold-bright text-background font-condensed uppercase tracking-wider"
-              >
-                <Lock className="mr-2 h-4 w-4" /> {loginBusy ? "Signing In" : "Sign In"}
-              </Button>
-            </form>
+              {loginBusy && <p className="text-sm text-muted-foreground">Signing in...</p>}
+            </div>
           </div>
         </section>
       </Layout>
@@ -419,11 +458,6 @@ const AdminStations = () => {
                   <p className="text-sm text-muted-foreground">
                     Signed in as {adminUser?.name ?? "Admin"} · GHL webhook submissions are stored as GitHub issues.
                   </p>
-                  {adminUsers.length > 0 && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Allowed admins: {adminUsers.map((user) => user.email).join(", ")}
-                    </p>
-                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" onClick={loadSubmissions} disabled={submissionsBusy}>

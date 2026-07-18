@@ -21,9 +21,9 @@ The admin station builder is available at `/#/admin/stations`, but it is protect
 
 Set these environment variables in Vercel or Cloudways before using the admin workflow:
 
-- `ADMIN_PASSWORD`: password for the station admin login.
+- `GOOGLE_CLIENT_ID`: Google OAuth web client ID used by the admin sign-in button.
 - `ADMIN_SESSION_SECRET`: long random value used to sign the admin session cookie.
-- `ADMIN_USERS`: optional JSON array of allowed admins. If omitted, the first admin is DC McCraney with username `Dominique.McCraney@gmail.com`.
+- `ADMIN_USERS`: JSON array of allowed Google account emails. Keep this private in server environment variables.
 - `GHL_WEBHOOK_SECRET`: shared secret sent by the GHL webhook after payment.
 - `GITHUB_TOKEN`: GitHub token with permission to create and read issues in this repo.
 - `GITHUB_REPOSITORY`: `DominaMack/good-to-go-radio-network-73`.
@@ -46,8 +46,8 @@ Example `ADMIN_USERS` value:
 ```json
 [
   {
-    "name": "DC McCraney",
-    "email": "Dominique.McCraney@gmail.com"
+    "name": "Admin Name",
+    "email": "admin@example.com"
   },
   {
     "name": "Second Admin Name",
