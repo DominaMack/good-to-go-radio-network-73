@@ -25,11 +25,23 @@ function base64url_decode(string $value): string {
     return base64_decode(strtr($value, '-_', '+/'));
 }
 
+function local_config_value(string $key): string {
+    static $config = null;
+    if ($config === null) {
+        $path = __DIR__ . '/.gtg-secrets.php';
+        $loaded = is_file($path) ? require $path : [];
+        $config = is_array($loaded) ? $loaded : [];
+    }
+    return isset($config[$key]) ? trim((string)$config[$key]) : '';
+}
+
 function env_value(string $key, string $default = ''): string {
     $value = getenv($key);
     if ($value !== false && $value !== '') return $value;
     $iniValue = ini_get($key);
-    return $iniValue === false || $iniValue === '' ? $default : $iniValue;
+    if ($iniValue !== false && $iniValue !== '') return $iniValue;
+    $localValue = local_config_value($key);
+    return $localValue !== '' ? $localValue : $default;
 }
 
 function admin_auth_configured(): bool {

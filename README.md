@@ -29,16 +29,21 @@ Set these environment variables in Vercel or Cloudways before using the admin wo
 - `GITHUB_REPOSITORY`: `DominaMack/good-to-go-radio-network-73`.
 - `GITHUB_ISSUE_LABEL`: optional, defaults to `station-submission`.
 
-On Cloudways PHP-FPM Settings, use the directive format Cloudways accepts:
+On Cloudways, create a private file at `api/.gtg-secrets.php` on the server after pulling the `cloudways` branch:
 
-```ini
-php_admin_value[SUPABASE_URL] = https://project-ref.supabase.co
-php_admin_value[SUPABASE_ANON_KEY] = your-supabase-anon-key
-php_admin_value[ADMIN_SESSION_SECRET] = a-long-random-secret
-php_admin_value[GHL_WEBHOOK_SECRET] = your-ghl-webhook-secret
-php_admin_value[GITHUB_TOKEN] = your-github-token
-php_admin_value[GITHUB_REPOSITORY] = DominaMack/good-to-go-radio-network-73
+```php
+<?php
+return [
+    'SUPABASE_URL' => 'https://project-ref.supabase.co',
+    'SUPABASE_ANON_KEY' => 'your-supabase-anon-key',
+    'ADMIN_SESSION_SECRET' => 'a-long-random-secret',
+    'GHL_WEBHOOK_SECRET' => 'your-ghl-webhook-secret',
+    'GITHUB_TOKEN' => 'your-github-token',
+    'GITHUB_REPOSITORY' => 'DominaMack/good-to-go-radio-network-73',
+];
 ```
+
+That file is intentionally ignored by Git and should not be committed.
 
 Admin users are managed in Supabase under Authentication > Users. Disable public signups for the project unless you intentionally want public users in this Supabase project.
 
