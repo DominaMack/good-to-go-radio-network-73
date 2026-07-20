@@ -21,13 +21,26 @@ The admin station builder is available at `/#/admin/stations`, but it is protect
 
 Set these environment variables in Vercel or Cloudways before using the admin workflow:
 
-- `GOOGLE_CLIENT_ID`: Google OAuth web client ID used by the admin sign-in button.
+- `SUPABASE_URL`: Supabase project URL, for example `https://project-ref.supabase.co`.
+- `SUPABASE_ANON_KEY`: Supabase anon public key for the project.
 - `ADMIN_SESSION_SECRET`: long random value used to sign the admin session cookie.
-- `ADMIN_USERS`: JSON array of allowed Google account emails. Keep this private in server environment variables.
 - `GHL_WEBHOOK_SECRET`: shared secret sent by the GHL webhook after payment.
 - `GITHUB_TOKEN`: GitHub token with permission to create and read issues in this repo.
 - `GITHUB_REPOSITORY`: `DominaMack/good-to-go-radio-network-73`.
 - `GITHUB_ISSUE_LABEL`: optional, defaults to `station-submission`.
+
+On Cloudways PHP-FPM Settings, use the directive format Cloudways accepts:
+
+```ini
+php_admin_value[SUPABASE_URL] = https://project-ref.supabase.co
+php_admin_value[SUPABASE_ANON_KEY] = your-supabase-anon-key
+php_admin_value[ADMIN_SESSION_SECRET] = a-long-random-secret
+php_admin_value[GHL_WEBHOOK_SECRET] = your-ghl-webhook-secret
+php_admin_value[GITHUB_TOKEN] = your-github-token
+php_admin_value[GITHUB_REPOSITORY] = DominaMack/good-to-go-radio-network-73
+```
+
+Admin users are managed in Supabase under Authentication > Users. Disable public signups for the project unless you intentionally want public users in this Supabase project.
 
 Configure the GHL post-payment workflow to send a `POST` request to:
 
@@ -40,21 +53,6 @@ Send the shared secret as either:
 - `?secret=YOUR_GHL_WEBHOOK_SECRET`
 
 The webhook accepts common station form fields such as station name, host name, genre, tagline, description, contact email, tier/plan, stream URL, cover image URL, website, Facebook, Instagram, and YouTube. It stores each paid submission as a GitHub issue, then the admin builder can load that issue into a station draft.
-
-Example `ADMIN_USERS` value:
-
-```json
-[
-  {
-    "name": "Admin Name",
-    "email": "admin@example.com"
-  },
-  {
-    "name": "Second Admin Name",
-    "email": "second.admin@example.com"
-  }
-]
-```
 
 ## Mobile app setup
 

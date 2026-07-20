@@ -1,36 +1,37 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { findAdminUser, getAdminUsers } from "../../api/_lib/auth.js";
+import { adminAuthConfigured, createAdminSession, getAdminSession } from "../../api/_lib/auth.js";
 
-describe("admin users", () => {
-  const previousAdminUsers = process.env.ADMIN_USERS;
+describe("admin auth", () => {
+  const previousSupabaseUrl = process.env.SUPABASE_URL;
+  const previousSupabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  const previousSessionSecret = process.env.ADMIN_SESSION_SECRET;
 
   afterEach(() => {
-    process.env.ADMIN_USERS = previousAdminUsers;
+    process.env.SUPABASE_URL = previousSupabaseUrl;
+    process.env.SUPABASE_ANON_KEY = previousSupabaseAnonKey;
+    process.env.ADMIN_SESSION_SECRET = previousSessionSecret;
   });
 
-  it("requires admins to be configured through ADMIN_USERS", () => {
-    delete process.env.ADMIN_USERS;
+  it("requires Supabase and session settings", () => {
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_ANON_KEY;
+    delete process.env.ADMIN_SESSION_SECRET;
 
-    expect(getAdminUsers()).toEqual([]);
-    expect(findAdminUser("admin@example.com")).toBeNull();
+    expect(adminAuthConfigured()).toBe(false);
   });
 
-  it("supports adding multiple admins through ADMIN_USERS", () => {
-    process.env.ADMIN_USERS = JSON.stringify([
-      {
-        name: "First Admin",
-        email: "admin@example.com",
-      },
-      {
-        name: "Second Admin",
-        email: "second@example.com",
-      },
-    ]);
+  it("reads a signed admin session without a stored admin list", () => {
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_ANON_KEY = "anon-key";
+    process.env.ADMIN_SESSION_SECRET = "test-session-secret";
 
-    expect(getAdminUsers()).toHaveLength(2);
-    expect(findAdminUser("second@example.com")).toMatchObject({
-      name: "Second Admin",
-      username: "second@example.com",
+    const token = createAdminSession({
+      name: "Admin Name",
+      email: "admin@example.com",
+      username: "admin@example.com",
     });
+    const session = getAdminSession({ headers: { cookie: `gtg_admin_session=${encodeURIComponent(token)}` } });
+
+    expect(session).toMatchObject({ name: "Admin Name", email: "admin@example.com" });
   });
 });

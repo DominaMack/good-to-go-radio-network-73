@@ -1,4 +1,4 @@
-import { adminAuthConfigured, createAdminSession, setAdminCookie, verifyGoogleCredential } from "../_lib/auth.js";
+import { adminAuthConfigured, createAdminSession, setAdminCookie, verifySupabasePassword } from "../_lib/auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -10,10 +10,10 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: "Admin authentication is not configured." });
   }
 
-  const adminUser = await verifyGoogleCredential(req.body?.credential);
+  const adminUser = await verifySupabasePassword(req.body?.email, req.body?.password);
 
   if (!adminUser) {
-    return res.status(401).json({ error: "This Google account is not authorized for admin access." });
+    return res.status(401).json({ error: "Invalid Supabase admin email or password." });
   }
 
   setAdminCookie(res, createAdminSession(adminUser));

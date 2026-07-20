@@ -10,7 +10,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     adminConfigured: adminAuthConfigured(),
-    googleClientId: process.env.GOOGLE_CLIENT_ID || "",
     authenticated: Boolean(adminUser),
     adminUser: adminUser || null,
   });

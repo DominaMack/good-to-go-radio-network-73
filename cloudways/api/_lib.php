@@ -27,78 +27,56 @@ function base64url_decode(string $value): string {
 
 function env_value(string $key, string $default = ''): string {
     $value = getenv($key);
-    return $value === false ? $default : $value;
+    if ($value !== false && $value !== '') return $value;
+    $iniValue = ini_get($key);
+    return $iniValue === false || $iniValue === '' ? $default : $iniValue;
 }
 
 function admin_auth_configured(): bool {
-    return env_value('ADMIN_USERS') !== '' && env_value('ADMIN_SESSION_SECRET') !== '' && env_value('GOOGLE_CLIENT_ID') !== '';
+    return env_value('SUPABASE_URL') !== '' && env_value('SUPABASE_ANON_KEY') !== '' && env_value('ADMIN_SESSION_SECRET') !== '';
 }
 
-function admin_users(): array {
-    $configured = trim(env_value('ADMIN_USERS'));
-    if ($configured === '') return [];
-
-    $decoded = json_decode($configured, true);
-    if (is_array($decoded)) {
-        $users = [];
-        foreach ($decoded as $user) {
-            if (!is_array($user)) continue;
-            $email = trim((string)($user['email'] ?? $user['username'] ?? ''));
-            $username = trim((string)($user['username'] ?? $email));
-            if ($email === '' || $username === '') continue;
-            $users[] = [
-                'name' => trim((string)($user['name'] ?? $email)),
-                'email' => $email,
-                'username' => $username,
-            ];
-        }
-        return $users;
-    }
-
-    $users = [];
-    foreach (preg_split('/[\n,]+/', $configured) as $entry) {
-        $entry = trim($entry);
-        if ($entry === '') continue;
-        if (preg_match('/^(.*?)\s*<([^>]+)>$/', $entry, $matches)) {
-            $users[] = ['name' => trim($matches[1]) ?: trim($matches[2]), 'email' => trim($matches[2]), 'username' => trim($matches[2])];
-        } else {
-            $users[] = ['name' => $entry, 'email' => $entry, 'username' => $entry];
-        }
-    }
-    return $users;
+function supabase_auth_url(string $path): string {
+    return rtrim(env_value('SUPABASE_URL'), '/') . '/auth/v1/' . $path;
 }
 
-function find_admin_user(?string $username): ?array {
-    $normalized = strtolower(trim((string)$username));
-    if ($normalized === '') return null;
-    foreach (admin_users() as $user) {
-        if ($normalized === strtolower($user['email']) || $normalized === strtolower($user['username'])) {
-            return $user;
-        }
-    }
-    return null;
-}
+function admin_user_from_supabase(array $user): ?array {
+    $email = trim((string)($user['email'] ?? ''));
+    if ($email === '') return null;
 
-function verify_google_credential(?string $credential): ?array {
-    if (!admin_auth_configured() || trim((string)$credential) === '') return null;
-
-    $url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . rawurlencode((string)$credential);
-    $raw = @file_get_contents($url);
-    if ($raw === false) return null;
-
-    $profile = json_decode($raw, true);
-    if (!is_array($profile)) return null;
-    if (($profile['aud'] ?? '') !== env_value('GOOGLE_CLIENT_ID')) return null;
-    if (($profile['email_verified'] ?? '') !== 'true' && ($profile['email_verified'] ?? false) !== true) return null;
-
-    $adminUser = find_admin_user($profile['email'] ?? '');
-    if (!$adminUser) return null;
+    $metadata = $user['user_metadata'] ?? [];
+    if (!is_array($metadata)) $metadata = [];
+    $name = trim((string)($metadata['name'] ?? $metadata['full_name'] ?? $email));
 
     return [
-        'name' => $adminUser['name'] ?: ($profile['name'] ?? $profile['email']),
-        'email' => $adminUser['email'],
-        'username' => $adminUser['username'],
+        'name' => $name !== '' ? $name : $email,
+        'email' => $email,
+        'username' => $email,
     ];
+}
+
+function verify_supabase_password(?string $email, ?string $password): ?array {
+    if (!admin_auth_configured() || trim((string)$email) === '' || trim((string)$password) === '') return null;
+
+    $headers = [
+        'apikey: ' . env_value('SUPABASE_ANON_KEY'),
+        'Authorization: Bearer ' . env_value('SUPABASE_ANON_KEY'),
+        'Content-Type: application/json',
+    ];
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'header' => implode("\r\n", $headers),
+            'content' => json_encode(['email' => $email, 'password' => $password]),
+            'ignore_errors' => true,
+        ],
+    ]);
+    $raw = @file_get_contents(supabase_auth_url('token?grant_type=password'), false, $context);
+    if ($raw === false) return null;
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded) || !is_array($decoded['user'] ?? null)) return null;
+    return admin_user_from_supabase($decoded['user']);
 }
 
 function sign_payload(string $payload): string {
@@ -144,8 +122,11 @@ function get_admin_session(): ?array {
     if (!hash_equals(sign_payload($payload), $signature)) return null;
     $session = json_decode(base64url_decode($payload), true);
     if (!is_array($session) || empty($session['sub']) || (int)$session['exp'] <= time()) return null;
-    $user = find_admin_user($session['username'] ?? $session['sub']);
-    return $user ?: null;
+    return [
+        'name' => trim((string)($session['name'] ?? $session['sub'])),
+        'email' => trim((string)$session['sub']),
+        'username' => trim((string)($session['username'] ?? $session['sub'])),
+    ];
 }
 
 function require_admin(): array {

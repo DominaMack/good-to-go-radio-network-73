@@ -11,10 +11,10 @@ if (!admin_auth_configured()) {
 }
 
 $body = request_json();
-$adminUser = verify_google_credential($body['credential'] ?? '');
+$adminUser = verify_supabase_password($body['email'] ?? '', $body['password'] ?? '');
 
 if (!$adminUser) {
-    json_response(401, ['error' => 'This Google account is not authorized for admin access.']);
+    json_response(401, ['error' => 'Invalid Supabase admin email or password.']);
 }
 
 set_admin_cookie(create_admin_session($adminUser));

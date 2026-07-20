@@ -28,76 +28,40 @@ export const parseCookies = (cookieHeader = "") =>
   );
 
 export const adminAuthConfigured = () =>
-  Boolean(process.env.ADMIN_USERS && process.env.ADMIN_SESSION_SECRET && process.env.GOOGLE_CLIENT_ID);
+  Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.ADMIN_SESSION_SECRET);
 
-export const getAdminUsers = () => {
-  const configuredUsers = process.env.ADMIN_USERS?.trim();
-  if (!configuredUsers) return [];
-
-  try {
-    const users = JSON.parse(configuredUsers);
-    if (Array.isArray(users)) {
-      return users
-        .map((user) => ({
-          name: String(user.name || user.email || user.username || "").trim(),
-          email: String(user.email || user.username || "").trim(),
-          username: String(user.username || user.email || "").trim(),
-        }))
-        .filter((user) => user.email && user.username);
-    }
-  } catch {
-    // Fall through to comma/newline parsing.
-  }
-
-  return configuredUsers
-    .split(/[\n,]+/)
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .map((entry) => {
-      const match = entry.match(/^(.*?)\s*<([^>]+)>$/);
-      const name = match?.[1]?.trim();
-      const email = (match?.[2] || entry).trim();
-      return {
-        name: name || email,
-        email,
-        username: email,
-      };
-    });
+const supabaseAuthUrl = (path) => {
+  const baseUrl = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+  return `${baseUrl}/auth/v1/${path}`;
 };
 
-export const findAdminUser = (username) => {
-  const normalizedUsername = String(username || "").trim().toLowerCase();
-  if (!normalizedUsername) return null;
-
-  return (
-    getAdminUsers().find((user) => {
-      const email = user.email.toLowerCase();
-      const configuredUsername = user.username.toLowerCase();
-      return normalizedUsername === email || normalizedUsername === configuredUsername;
-    }) || null
-  );
-};
-
-export const verifyGoogleCredential = async (credential) => {
-  if (!adminAuthConfigured() || !credential) return null;
-
-  const response = await fetch(
-    `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`,
-  );
-  if (!response.ok) return null;
-
-  const profile = await response.json();
-  if (profile.aud !== process.env.GOOGLE_CLIENT_ID) return null;
-  if (profile.email_verified !== "true" && profile.email_verified !== true) return null;
-
-  const adminUser = findAdminUser(profile.email);
-  if (!adminUser) return null;
+const adminUserFromSupabase = (user) => {
+  const email = String(user?.email || "").trim();
+  if (!email) return null;
 
   return {
-    name: adminUser.name || profile.name || profile.email,
-    email: adminUser.email,
-    username: adminUser.username,
+    name: String(user?.user_metadata?.name || user?.user_metadata?.full_name || email).trim(),
+    email,
+    username: email,
   };
+};
+
+export const verifySupabasePassword = async (email, password) => {
+  if (!adminAuthConfigured() || !email || !password) return null;
+
+  const response = await fetch(supabaseAuthUrl("token?grant_type=password"), {
+    method: "POST",
+    headers: {
+      apikey: process.env.SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) return null;
+
+  const session = await response.json();
+  return adminUserFromSupabase(session.user);
 };
 
 export const createAdminSession = (adminUser) => {
@@ -125,12 +89,10 @@ export const getAdminSession = (req) => {
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
     if (!session.sub || session.exp <= Math.floor(Date.now() / 1000)) return false;
-    const adminUser = findAdminUser(session.username || session.sub);
-    if (!adminUser) return false;
     return {
-      name: session.name || adminUser.name,
-      email: adminUser.email,
-      username: adminUser.username,
+      name: session.name || session.sub,
+      email: session.sub,
+      username: session.username || session.sub,
     };
   } catch {
     return false;
