@@ -101,9 +101,11 @@ const Footer = () => {
           <p className="text-xs text-muted-foreground font-condensed tracking-wider uppercase">
             © 2026 Good To Go Radio. All Rights Reserved.
           </p>
-          <p className="text-xs text-muted-foreground font-condensed tracking-wider uppercase">
-            Broadcasting Worldwide · 24/7
-          </p>
+          <div className="flex items-center gap-3 text-xs font-condensed tracking-wider uppercase">
+            <Link to="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
+            <span className="text-muted-foreground/60">|</span>
+            <Link to="/terms-of-use" className="text-muted-foreground hover:text-primary transition-colors">Terms of Use</Link>
+          </div>
         </div>
       </div>
     </footer>
