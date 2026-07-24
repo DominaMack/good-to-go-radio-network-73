@@ -242,7 +242,7 @@ export const stations: Station[] = [
     tagline: "Generations Of Praise",
     description: "Established in 1959, the Douglass Family Singers began in the legacy of Lillie Mae and Charlie Douglass Sr., parents who both sang. Lillie Mae sang with the girls until her passing in 2000, while Charlie Douglass Sr. sang with the Five Star Jubilee. Charles Jr., Michael, and Alvin Douglass sang with family and various groups until their passing. The family continues praising the Lord across generations, and the children of the Douglass Family Singers occasionally gather as D3, the Douglass 3rd Generation of Singers. Members include Margie Moore, Glenda Buckles, Willie Mae Springs, Ivy Dowdell, and Christine Pankey.",
     contactEmail: "thedouglassfamilysingers@gmail.com",
-    streamUrl: "https://us1.streamingpulse.com:2199/start/douglassquartet",
+    streamUrl: "https://us1.streamingpulse.com/stream/douglassquartet",
     tier: "standard",
     featured: false,
     approved: true,
